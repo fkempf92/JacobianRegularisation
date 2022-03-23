@@ -1,3 +1,6 @@
 # JacobianRegularisation
 
-Implements $L_1$ Jacobian regularisation
+```math
+L_1
+```
+Implements $$ Jacobian regularisation
