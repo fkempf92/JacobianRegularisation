@@ -8,7 +8,7 @@ Implements $L_1$ and $L_2$ Jacobian regularisation, both elementwise and column-
 Moreover, the NN is directly trained and tuned with Skorch... hence connection to skorch! 
 
 
-'''python
+```python
 from jacobian import RegularizedNet
 
-'''
+```
