@@ -1,11 +1,8 @@
 # JacobianRegularisation
 
-```math
-L_1
-```
-Implements $L_1$ and $L_2$ Jacobian regularisation, both elementwise and column-mean 
+I present an arbitrary example neural network, for which we can perform weight and/or Jacobian regularisation. 
 
-Moreover, the NN is directly trained and tuned with Skorch... hence connection to skorch! 
+The network can be trained using Skorch, simplifying the hyperparameter tuning! 
 
 
 ```python
