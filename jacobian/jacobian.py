@@ -6,8 +6,6 @@ from skorch import NeuralNet
 
 class NeuralNetKK(nn.Module):
     """
-    Implements Kapetanios Kempf NN-FM model. Allows for weight penalty.
-
     Class differentiates between two types of architectures: constant (True)
     and pyramid (False). In the constant case, the number of nodes do not
     change over all hidden layers (=constant), whereas in the case of
@@ -109,37 +107,6 @@ class NeuralNetKK(nn.Module):
             self.layers.append(nn.Linear(nodes_arch[hidden_layers - 1], 1))
         self.model = nn.Sequential(*self.layers)
 
-    def _get_weights(self):
-        """
-        Gets model weights only and ignores biases
-        Returns
-        -----------
-        w: list
-            list of weights
-        """
-        w = []
-        for name, param in self.layers.named_parameters():
-            if 'weight' in name:
-                w.append(param)
-        return w
-
-    def _get_derivs(self, X):
-        """
-        produces Jacobian dy/dX
-        :param X:
-        :return:
-        """
-
-        X.requires_grad_()
-        m = self.model.eval()(X)
-        g = torch.autograd.grad(outputs=m,
-                                inputs=X,
-                                grad_outputs=torch.ones_like(m),
-                                retain_graph=True,
-                                only_inputs=True,
-                                create_graph=True)[0]
-        return g.detach().numpy()
-
     def forward(self, x):
         """
         We need to return a tuple because we need the weights for future
@@ -165,35 +132,53 @@ class RegularizedNet(NeuralNet):
 
     Parameters
     ----------
+    weight_reg: bool
+        Do you want to include weight regularisation?
     w_alpha: float
-        penalty for weight
+        weight penalty (notation from sklearn, think lambda)
     w_l1_ratio: float
         ratio of penalty for weights.
         w_l1_ratio = 1 corresponds to LASSO
         w_l1_ratio = 0 corresponds to Ridge
         0 < w_l1_ratio < 1 corresponds to Elastic Net
-    g_alpha: float, default=None
-        penalty for gradients, no penalty if set to None
-    g_l1_ratio: float
+
+    jacob_reg: bool
+        Do you want to include Jacobian regularisation?
+    jacob_type: "element" or "mean"
+        Do you with to perform elemen-wise or column mean Jacobian
+        regularisation?
+    j_alpha: float
+        input gradient penalty (notation from sklearn, think lambda)
+    j_l1_ratio: float
         ratio of penalty for gradients.
         w_l1_ratio = 1 corresponds to LASSO
         w_l1_ratio = 0 corresponds to Ridge
         0 < w_l1_ratio < 1 corresponds to Elastic Net
-    grads: boolean, default=False
-        If true, gradients are penalised too, only weight penalties if False
     """
-    def __init__(self, *args, w_alpha=None, w_l1_ratio=1,
-                 grads=False, g_alpha=1, g_l1_ratio=1, **kwargs):
+    def __init__(self, *args,
+                 weight_reg=True,
+                 w_alpha=1,
+                 w_l1_ratio=1,
+                 jacob_reg=False,
+                 jacob_type='element',
+                 j_alpha=1,
+                 j_l1_ratio=1, **kwargs):
+
         super().__init__(*args, **kwargs)
+        self.weight_reg = weight_reg
         self.w_alpha = w_alpha
         self.w_l1_ratio = w_l1_ratio
-        self.g_alpha = g_alpha
-        self.g_l1_ratio = g_l1_ratio
-        self.grads = grads
+
+        self.jacob_reg = jacob_reg
+        self.jacob_type = jacob_type
+        self.j_alpha = j_alpha
+        self.j_l1_ratio = j_l1_ratio
 
     def get_loss(self, y_pred, y_true, X=None, training=False):
-        loss = super().get_loss(y_pred, y_true, X=X, training=training)  # MSE
-        if self.w_alpha is not None:
+        # 1) Regular MSE
+        loss = super().get_loss(y_pred, y_true, X=X, training=training)
+        # 2) Add weight regularisation?
+        if self.weight_reg:
             weights = [w for name, w in self.module_.named_parameters()
                        if 'weight' in name]  # we exclude biases
             l1 = torch.tensor([0], dtype=torch.float32)
@@ -222,23 +207,24 @@ class RegularizedNet(NeuralNet):
         self.module_.train()
         y_pred = self.infer(Xi, **fit_params)
         loss = self.get_loss(y_pred, yi, X=Xi, training=True)
-        if self.grads is not False:
+        # 3) Jacobian regularisation
+        if self.jacob_reg:
             Xi.requires_grad_()
             m = self.module_.model(Xi)
-            g = torch.autograd.grad(outputs=m,
+            j = torch.autograd.grad(outputs=m,
                                     inputs=Xi,
                                     grad_outputs=torch.ones_like(m),
                                     retain_graph=True,
                                     only_inputs=True,
                                     create_graph=True)[0]
-            if self.grads == 'mean':
-                g1 = g.mean(dim=0).norm(1)
-                g2 = g.mean(dim=0).norm(2)
-            if self.grads == 'norm':
-                g1 = g.norm(1)
-                g2 = g.norm(2)
-            loss += self.g_l1_ratio * self.g_alpha * g1 + \
-                0.5 * (1 - self.g_l1_ratio) * self.g_alpha * g2
+            if self.jacob_type == 'mean':
+                j1 = j.mean(dim=0).norm(1)
+                j2 = j.mean(dim=0).norm(2)
+            if self.jacob_type == 'element':
+                j1 = j.norm(1)
+                j2 = j.norm(2)
+            loss += self.j_l1_ratio * self.j_alpha * j1 + \
+                0.5 * (1 - self.j_l1_ratio) * self.j_alpha * j2
         loss.backward()
 
         self.notify(
