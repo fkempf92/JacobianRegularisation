@@ -1,6 +1,6 @@
 # JacobianRegularisation
 
-I present an arbitrary example neural network, for which we can perform weight and/or Jacobian regularisation. 
+I present an example neural network, which can perform weight and/or Jacobian regularisation. 
 
 In particular, this method extends the Jacobian regularisation published by facebookresearch (https://github.com/facebookresearch/jacobian_regularizer), which is primarily targeted for image recognition applications. Hence, they merely consider what I call element-wise Jacobian regularisation. However, depending on the application of neural networks in asset pricing, the Jacobian has economic meaning and hence, we also consider column-mean regularisation. More details on this can be found here: https://www.kcl.ac.uk/business/assets/pdf/dafm-working-papers/2022-papers/interpretable-machine-learning-modelling-for-asset-pricing.pdf
 
