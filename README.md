@@ -1,12 +1,14 @@
 # JacobianRegularisation
 
-I present an example neural network, which can perform weight and/or Jacobian regularisation. 
+The presented method extends the Jacobian regularisation published by facebookresearch (https://github.com/facebookresearch/jacobian_regularizer), which is targeted for image recognition applications. They primarily consider what I call element-wise Jacobian regularisation, due to the nature of input gradients in the domain of image recognition. 
 
-In particular, this method extends the Jacobian regularisation published by facebookresearch (https://github.com/facebookresearch/jacobian_regularizer), which is primarily targeted for image recognition applications. Hence, they merely consider what I call element-wise Jacobian regularisation. However, depending on the application of neural networks in asset pricing, the Jacobian has economic meaning and hence, we also consider column-mean regularisation. More details on this can be found here: https://www.kcl.ac.uk/business/assets/pdf/dafm-working-papers/2022-papers/interpretable-machine-learning-modelling-for-asset-pricing.pdf
+However, in asset pricing, the input gradients have a clear economic meaning and interpretation (depending on the application)and, hence, I also consider column-mean regularisation. More details on this can be found here: https://www.kcl.ac.uk/business/assets/pdf/dafm-working-papers/2022-papers/interpretable-machine-learning-modelling-for-asset-pricing.pdf
 
 The network can be trained using Skorch, sustantially simplifying the hyperparameter tuning! 
 
 The presented example does not only allow for the tuning of standard hyperparemeters, such as weight and Jacobian regularisation, but also architectural parameters, such as the activation function, number of nodes, hidden layers, and network shape (including a constant vs. tapered shape).
+
+
 
 ```python
 from jacobian import RegularizedNet
