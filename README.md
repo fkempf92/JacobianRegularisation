@@ -6,6 +6,8 @@ In particular, this method extends the Jacobian regularisation published by face
 
 The network can be trained using Skorch, sustantially simplifying the hyperparameter tuning! 
 
+The presented example does not only allow for the tuning of standard hyperparemeters, such as weight and Jacobian regularisation, but also architectural parameters, such as the activation function, number of nodes, hidden layers, and network shape (including a constant vs. tapered shape).
+
 ```python
 from jacobian import RegularizedNet
 
