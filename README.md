@@ -17,8 +17,7 @@ pip install git+https://github.com/fkempf92/JacobianRegularisation.git
 ```
 ## Usage
 ```python
-from jacobian import RegularizedNet
-
+from jacobian import RegularizedNet, NeuralNetKK
 from skorch.callbacks import EarlyStopping
 from sklearn.model_selection import RandomizedSearchCV
 
