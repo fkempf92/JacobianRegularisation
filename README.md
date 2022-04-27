@@ -99,6 +99,6 @@ gs.fit(X_train, y_train)
 # get best model
 gs.best_estimator_
 # perform predictions
-gs.predict(X_test_
+gs.predict(X_test_)
 
 ```
