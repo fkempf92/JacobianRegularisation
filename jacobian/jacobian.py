@@ -120,6 +120,17 @@ class NeuralNetKK(nn.Module):
         for layer in self.layers:
             x = layer(x)
         return x
+    
+    def _get_derivs(self, X):
+        X.requires_grad_()
+        m = self.model.eval()(X)
+        g = torch.autograd.grad(outputs=m,
+                                inputs=X,
+                                grad_outputs=torch.ones_like(m),
+                                retain_graph=True,
+                                only_inputs=True,
+                                create_graph=True)[0]
+        return g.detach().numpy()
 
 
 class RegularizedNet(NeuralNet):
