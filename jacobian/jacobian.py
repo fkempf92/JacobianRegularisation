@@ -209,7 +209,7 @@ class RegularizedNet(NeuralNet):
         self._set_training(True)
         Xi, yi = unpack_data(batch)
         y_pred = self.infer(Xi, **fit_params)
-        loss = self.get_loss(y_pred, yi=yi, X=Xi, training=True)
+        loss = self.get_loss(y_pred, y_true=yi, X=Xi, training=True)
         # 3) Jacobian regularisation
         if self.jacob_reg:
             Xi.requires_grad_()
