@@ -190,7 +190,7 @@ class RegularizedNet(NeuralNet):
                 0.5 * (1 - self.w_l1_ratio) * self.w_alpha * l2[0]
         return loss
 
-    def train_step_single(self, Xi, yi, **fit_params):
+    def train_step_single(self, batch, **fit_params):
         """Compute y_pred, loss value, and update net's gradients.
         The module is set to be in train mode (e.g. dropout is
         applied).
@@ -204,7 +204,9 @@ class RegularizedNet(NeuralNet):
           Additional parameters passed to the ``forward`` method of
           the module and to the ``self.train_split`` call.
         """
-        self.module_.train()
+        # self.module_.train()
+        self._set_training(True)
+        Xi, yi = unpack_data(batch)
         y_pred = self.infer(Xi, **fit_params)
         loss = self.get_loss(y_pred, yi=yi, X=Xi, training=True)
         # 3) Jacobian regularisation
