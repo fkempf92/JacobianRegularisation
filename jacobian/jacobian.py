@@ -1,6 +1,7 @@
 import torch
 import torch.nn as nn
 from skorch.utils import TeeGenerator
+from skorch.dataset import unpack_data
 from skorch import NeuralNet
 
 
